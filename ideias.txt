@@ -1,0 +1,16 @@
+* Identificar os quadrados
+* Extrair as cores (média)
+* Juntar as cores parecidas (kmeans)
+* criar mapa com as cores (posição -> cor)
+
+
+Hipoteses de deteção de quadrados:
+* Convolution Edge Detection Filter
+* Canny Edge Detector (OpenCV)
+* Square Detection (OpenCV)
+* Manual very very bad
+
+
+OpenCV util
+undistort()-> correct distortions to make Squares
+

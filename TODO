@@ -1,0 +1,21 @@
+* Pôr a raspberry a funcionar
+* Ligar a raspberry aos computadores
+* Dar o setup da camera
+* Raspberry correr Python e bibliotecas (OpenCV e numpy e sklearn.cluster)
+* Código de python a tirar fotos
+
+
+Approach 1:
+* Remover distorção
+* Encontrar quadrados
+
+Approach 2:
+* Encontrar quadrados
+
+
+* Tirar lista de pixeis de cada quadrado
+* Normalizar (média)
+* Kmean (descobrir 6 classes de cores)
+* Mapear posições a cores
+
+
