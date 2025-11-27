@@ -3,6 +3,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+
 def find_lines(image, canny_threshold1=50, canny_threshold2=150,
                hough_threshold=100, min_line_length=50, max_line_gap=10,
                angle_tolerance_deg=10):
@@ -102,6 +108,35 @@ def draw_lines_and_points(image, horizontal_lines, vertical_lines, intersections
     return vis
 
 
+def drawCircle(vis, x, y):
+    cv2.circle(vis, (int(x), int(y)), radius=5,
+               color=(0, 255, 255), thickness=6)
+
+
+def getMiddles(corner1, corner2):
+
+    distX = corner2.x - corner1.x
+    distY = corner2.y - corner1.y
+    dist = (distX + distY) / 2
+
+    mDist = dist/6
+    l = []
+
+    for i in range(3):
+        for j in range(3):
+            l.append(Point(corner1.x + i * mDist*2 + mDist,
+                           corner1.y + j * mDist*2 + mDist))
+
+    return l
+
+
+def getColor(img, point, size):
+
+    # getMean in hsv with size size, point is center
+    #
+    pass
+
+
 def main(image_path):
     # Load image
     img = cv2.imread(image_path)
@@ -121,9 +156,31 @@ def main(image_path):
     intersections = get_intersections(horizontal_lines, vertical_lines)
     print(f"Found {len(intersections)} intersection points.")
 
+    x1, y1 = 4000, 4000
+    for pair in intersections:
+        x1 = min(x1, pair[0])
+        y1 = min(y1, pair[1])
+
+    x2, y2 = 0, 0
+    for pair in intersections:
+        x2 = max(x2, pair[0])
+        y2 = max(y2, pair[1])
+
     # 3. Draw lines + intersections
     vis = draw_lines_and_points(
         img, horizontal_lines, vertical_lines, intersections)
+
+    drawCircle(vis, x1, y1)
+    drawCircle(vis, x2, y2)
+    middles = getMiddles(Point(x1, y1), Point(x2, y2))
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+    colors = []
+    size = ((x2 + x1)/2 + (y2 - y1)/2)/2
+
+    for point in middles:
+        colors.append(getColor(hsv, point, size/9))
+        drawCircle(vis, point.x, point.y)
 
     # 4. Show with matplotlib (BGR → RGB)
     vis_rgb = cv2.cvtColor(vis, cv2.COLOR_BGR2RGB)
