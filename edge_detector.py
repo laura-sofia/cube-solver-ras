@@ -9,6 +9,23 @@ class Point:
         self.y = y
 
 
+def get_square_hsv(square_img):
+    """Returns average HSV of a square."""
+    hsv_square = cv2.cvtColor(square_img, cv2.COLOR_BGR2HSV)
+    h, s, v = np.mean(hsv_square, axis=(0, 1)).astype(int)
+    return (h, s, v)
+
+
+def getAverageColor(img, p, size):
+
+    size = int(size/2)
+    p.x = int(p.x)
+    p.y = int(p.y)
+
+    square_segment = img[p.y - size:p.y + size, p.x - size:p.x + size]
+    return get_square_hsv(square_segment)
+
+
 def find_lines(image, canny_threshold1=50, canny_threshold2=150,
                hough_threshold=100, min_line_length=50, max_line_gap=10,
                angle_tolerance_deg=10):
@@ -130,17 +147,11 @@ def getMiddles(corner1, corner2):
     return l
 
 
-def getColor(img, point, size):
-
-    # getMean in hsv with size size, point is center
-    #
-    pass
-
-
 def main(image_path):
     # Load image
     img = cv2.imread(image_path)
-    img = img[500:1700, 440:1700]
+    # img = img[500:1700, 440:1700]
+    img = img[100:700, 200:850]
 
     if img is None:
         print(f"Error loading image: {image_path}")
@@ -173,13 +184,20 @@ def main(image_path):
     drawCircle(vis, x1, y1)
     drawCircle(vis, x2, y2)
     middles = getMiddles(Point(x1, y1), Point(x2, y2))
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+    cubesize = ((x2 + x1)/2 + (y2 - y1)/2)/2
 
     colors = []
-    size = ((x2 + x1)/2 + (y2 - y1)/2)/2
 
     for point in middles:
-        colors.append(getColor(hsv, point, size/9))
+
+        tpl = getAverageColor(img, point, cubesize/9)
+        colors.append(tpl)
+        hsv_array = np.array([[tpl]], dtype=np.uint8)
+        bgr_array = cv2.cvtColor(hsv_array, cv2.COLOR_HSV2BGR)[0, 0]
+        rgb_tuple = (int(bgr_array[0]), int(bgr_array[1]), int(bgr_array[2]))
+        cv2.circle(vis, (int(point.x), int(point.y)), radius=24,
+                   color=rgb_tuple, thickness=20)
         drawCircle(vis, point.x, point.y)
 
     # 4. Show with matplotlib (BGR → RGB)
@@ -194,4 +212,4 @@ def main(image_path):
 
 if __name__ == "__main__":
     # Change this to your image path
-    main(r"./fotos/cubo6cm.jpg")
+    main(r"./fotos/cubo26cm.jpg")
