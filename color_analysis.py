@@ -163,6 +163,12 @@ def generate_noisy_hsv_grid(n_colors, rows=6, cols=9,
     return hsv_grid, labels_grid, base_colors
 
 def Test():
+    """Demonstration routine that generates a noisy HSV grid, clusters the colors,
+    and plots the results for visual verification.
+
+    This function is intended to be run as a standalone script to verify that
+    the clustering and plotting functions behave as expected.
+    """
     hsv_grid, true_labels, base_colors = generate_noisy_hsv_grid(
         n_colors=6, rows=6, cols=9, noise_std=(5, 5, 5), seed=None
     )
@@ -171,7 +177,6 @@ def Test():
     print(f"Label size: {labels.shape}")
     plot_hsv_clusters(hsv_grid, labels)
     print(check_color(labels))
-
 
 if __name__ == "__main__":
     Test()
