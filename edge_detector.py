@@ -3,6 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+COLOR_FILE = "colors.txt"
+
+
 class Point:
     """Simple 2D point container holding integer coordinates (x, y)."""
 
@@ -170,7 +173,76 @@ def getMiddles(corner1, corner2):
     return l
 
 
+def write_colors_to_file(colors):
+    """
+    Colors is a list of tuples of size 3 (hsv).
+    """
+    # 'a' stands for append mode
+    with open(COLOR_FILE, "a") as file:
+
+        for c in colors:
+            file.write(f"{int(c[0])},{int(c[1])},{int(c[2])}\n")
+
+
 def main(image_path):
+    """Process an image of a Rubik's cube face and visualize detected lines, intersections, and colors.
+
+    This function ties together the various helpers defined in this module. It
+    loads the specified image, crops it to a region of interest, finds
+    horizontal and vertical lines, computes their intersections, estimates the
+    cube size, samples colour at the nine facelet positions, and displays the
+    result using Matplotlib.
+
+    Parameters
+    ----------
+    image_path : str
+        Path to the input image file to analyse.
+    """
+    # Load image
+    img = cv2.imread(image_path)
+    # img = img[500:1700, 440:1700]
+    img = img[100:700, 200:850]
+
+    if img is None:
+        print(f"Error loading image: {image_path}")
+        return []
+
+    # 1. Find horizontal and vertical lines
+    horizontal_lines, vertical_lines = find_lines(img)
+
+    print(f"Found {len(horizontal_lines)} horizontal lines.")
+    print(f"Found {len(vertical_lines)} vertical lines.")
+
+    # 2. Find intersections
+    intersections = get_intersections(horizontal_lines, vertical_lines)
+    print(f"Found {len(intersections)} intersection points.")
+
+    # We assume that the size of the image will be aproximatelly of the size of the cube
+    x1, y1 = 4000, 4000
+    for pair in intersections:
+        x1 = min(x1, pair[0])
+        y1 = min(y1, pair[1])
+
+    x2, y2 = 0, 0
+    for pair in intersections:
+        x2 = max(x2, pair[0])
+        y2 = max(y2, pair[1])
+
+    middles = getMiddles(Point(x1, y1), Point(x2, y2))
+
+    cubesize = ((x2 + x1)/2 + (y2 - y1)/2)/2
+
+    colors = []
+
+    for point in middles:
+
+        tpl = getAverageColor(img, point, cubesize/9)
+        colors.append(tpl)
+
+    return colors
+
+
+def show_main(image_path):
     """Process an image of a Rubik's cube face and visualize detected lines, intersections, and colors.
 
     This function ties together the various helpers defined in this module. It
@@ -220,6 +292,7 @@ def main(image_path):
 
     drawCircle(vis, x1, y1)
     drawCircle(vis, x2, y2)
+
     middles = getMiddles(Point(x1, y1), Point(x2, y2))
 
     cubesize = ((x2 + x1)/2 + (y2 - y1)/2)/2
@@ -237,6 +310,8 @@ def main(image_path):
                    color=rgb_tuple, thickness=20)
         drawCircle(vis, point.x, point.y)
 
+    write_colors_to_file(colors)
+
     # 4. Show with matplotlib (BGR → RGB)
     vis_rgb = cv2.cvtColor(vis, cv2.COLOR_BGR2RGB)
 
@@ -249,4 +324,4 @@ def main(image_path):
 
 if __name__ == "__main__":
     # Change this to your image path
-    main(r"./fotos/cubo26cm.jpg")
+    show_main(r"./fotos/cubo26cm.jpg")

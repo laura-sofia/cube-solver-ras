@@ -4,7 +4,8 @@ import numpy as np
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 
-def group_hsv_kmeans(hsv_flat_array,h,w, n_clusters=6, random_state=0):
+
+def group_hsv_kmeans(hsv_flat_array, h=6, w=9, n_clusters=6, random_state=0):
     """
     Parameters
     ----------
@@ -20,24 +21,26 @@ def group_hsv_kmeans(hsv_flat_array,h,w, n_clusters=6, random_state=0):
     labels_2d : np.ndarray
         Array of shape (6, 9) (or (H, W)) with group indices 0..n_clusters-1.
     """
-    
+
     # Flatten to (N, 3) where N = 6*9
     pixels = hsv_flat_array
-    
+
     # Run k-means in HSV space
-    kmeans = KMeans(n_clusters=n_clusters, random_state=random_state, n_init="auto")
+    kmeans = KMeans(n_clusters=n_clusters,
+                    random_state=random_state, n_init="auto")
     labels = kmeans.fit_predict(pixels)  # shape (N,)
-    
+
     # Reshape labels back to (6, 9)
     labels_2d = labels.reshape(h, w)
     return labels_2d
+
 
 def check_color(labels_2d):
     """
     Check if each colour only appears 9 times
     """
     _, counts = np.unique(labels_2d, return_counts=True)
-    return all(counts==9)
+    return all(counts == 9)
 
 
 def plot_hsv_clusters(hsv_grid, labels_grid):
@@ -57,7 +60,8 @@ def plot_hsv_clusters(hsv_grid, labels_grid):
 
     # Convert HSV (OpenCV format) -> RGB for plotting
     hsv_uint8 = hsv_flat.astype(np.uint8).reshape(1, -1, 3)
-    rgb_flat = cv2.cvtColor(hsv_uint8, cv2.COLOR_HSV2RGB).reshape(-1, 3) / 255.0
+    rgb_flat = cv2.cvtColor(
+        hsv_uint8, cv2.COLOR_HSV2RGB).reshape(-1, 3) / 255.0
 
     N = hsv_flat.shape[0]
 
@@ -73,7 +77,8 @@ def plot_hsv_clusters(hsv_grid, labels_grid):
     cmap = plt.get_cmap("tab10")  # distinct colors for clusters
     for i in range(N):
         plt.scatter(i, 0, color=cmap(labels_flat[i] % 10), s=200)
-        plt.text(i, -0.1, str(labels_flat[i]), ha='center', va='top', fontsize=8)
+        plt.text(i, -0.1, str(labels_flat[i]),
+                 ha='center', va='top', fontsize=8)
 
     plt.ylim(0, 0.1)
     plt.yticks([0, 1], ["Cluster", "Color"])
@@ -82,6 +87,7 @@ def plot_hsv_clusters(hsv_grid, labels_grid):
     plt.title("HSV Colors (top) and K-means Clusters (bottom)")
     plt.grid(False)
     plt.show()
+
 
 def generate_noisy_hsv_grid(n_colors, rows=6, cols=9,
                             noise_std=(5, 20, 20), seed=None):
@@ -125,13 +131,13 @@ def generate_noisy_hsv_grid(n_colors, rows=6, cols=9,
     if n_colors > N:
         raise ValueError("n_colors cannot be greater than rows*cols")
 
-    labels_flat = np.ndarray((N,),int)
+    labels_flat = np.ndarray((N,), int)
 
     # Ensure every color is used at least once
     for k in range(N):
-        labels_flat[k] = k%n_colors
+        labels_flat[k] = k % n_colors
     rng.shuffle(labels_flat)
-    
+
     labels_grid = labels_flat.reshape(rows, cols)
 
     # Create noisy HSV grid
@@ -158,6 +164,7 @@ def generate_noisy_hsv_grid(n_colors, rows=6, cols=9,
 
     return hsv_grid, labels_grid, base_colors
 
+
 def Test():
     """Demonstration routine that generates a noisy HSV grid, clusters the colors,
     and plots the results for visual verification.
@@ -173,10 +180,11 @@ def Test():
     h, w = hsv_grid.shape[:2]
     hsv_grid = hsv_grid.reshape(-1, hsv_grid.shape[-1])
 
-    labels = group_hsv_kmeans(hsv_grid,h,w)
+    labels = group_hsv_kmeans(hsv_grid, h, w)
     print(f"Label size: {labels.shape}")
     plot_hsv_clusters(hsv_grid, labels)
     print(check_color(labels))
+
 
 if __name__ == "__main__":
     Test()
