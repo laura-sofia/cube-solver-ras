@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 
-def group_hsv_kmeans(hsv_array, n_clusters=6, random_state=0):
+def group_hsv_kmeans(hsv_flat_array,h,w, n_clusters=6, random_state=0):
     """
     Parameters
     ----------
@@ -20,13 +20,9 @@ def group_hsv_kmeans(hsv_array, n_clusters=6, random_state=0):
     labels_2d : np.ndarray
         Array of shape (6, 9) (or (H, W)) with group indices 0..n_clusters-1.
     """
-    hsv_array = np.asarray(hsv_array)
-    
-    # Save the spatial shape (6, 9)
-    h, w = hsv_array.shape[:2]
     
     # Flatten to (N, 3) where N = 6*9
-    pixels = hsv_array.reshape(-1, hsv_array.shape[-1])
+    pixels = hsv_flat_array
     
     # Run k-means in HSV space
     kmeans = KMeans(n_clusters=n_clusters, random_state=random_state, n_init="auto")
@@ -173,7 +169,11 @@ def Test():
         n_colors=6, rows=6, cols=9, noise_std=(5, 5, 5), seed=None
     )
 
-    labels = group_hsv_kmeans(hsv_grid)
+    hsv_grid = np.asarray(hsv_grid)
+    h, w = hsv_grid.shape[:2]
+    hsv_grid = hsv_grid.reshape(-1, hsv_grid.shape[-1])
+
+    labels = group_hsv_kmeans(hsv_grid,h,w)
     print(f"Label size: {labels.shape}")
     plot_hsv_clusters(hsv_grid, labels)
     print(check_color(labels))
