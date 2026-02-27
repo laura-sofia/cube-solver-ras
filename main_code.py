@@ -10,7 +10,7 @@ PHOTO_FILEPATHS = []
 
 
 def take_photos():
-    """verical side than up than down"""
+    """vertical side than up than down"""
 
     movements = ['', 'Y', 'Y', 'Y', 'YX', 'XX']
     for i in range(6):
@@ -35,7 +35,7 @@ def run_kmean(colors):
     return labels_2d
 
 
-def clear_all():
+def clear_all_photos():
 
     for i in range(6):
         file_path = PHOTO_FILEPATHS[i]
@@ -53,9 +53,10 @@ def create_filepaths():
 
 
 def main():
+    create_filepaths()
     take_photos()
     colors = detect_edges()
-    clear_all()
+    clear_all_photos()
     if len(colors) != 54:
         return
 
