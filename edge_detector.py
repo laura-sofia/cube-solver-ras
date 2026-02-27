@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 
 
 class Point:
+    """Simple 2D point container holding integer coordinates (x, y)."""
+
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -17,7 +19,7 @@ def get_square_hsv(square_img):
 
 
 def getAverageColor(img, p, size):
-
+    """Returns the average color of a square of size 'size' centered in point p."""
     size = int(size/2)
     p.x = int(p.x)
     p.y = int(p.y)
@@ -77,28 +79,18 @@ def find_lines(image, canny_threshold1=50, canny_threshold2=150,
 
 def get_intersections(horizontal_lines, vertical_lines):
     """
-    Compute all intersection points between horizontal and vertical line segments.
+    Compute all intersection points between horizontal and vertical lines.
     Returns a list of (x, y) tuples.
     """
     intersections = []
 
     for x1h, y1h, x2h, y2h in horizontal_lines:
-        # For an (approximately) horizontal line, y is roughly constant,
-        # but we use endpoints as segment bounds.
+        # For an (approximately) horizontal line, y is roughly constant
         yh = (y1h + y2h) / 2.0
-        xh_min, xh_max = sorted([x1h, x2h])
 
         for x1v, y1v, x2v, y2v in vertical_lines:
             # For an (approximately) vertical line, x is roughly constant
             xv = (x1v + x2v) / 2.0
-            yv_min, yv_max = sorted([y1v, y2v])
-
-            # Intersection candidate:
-            #   x = xv (vertical), y = yh (horizontal)
-            xi, yi = xv, yh
-
-            # Check if (xi, yi) lies within both segments
-
             intersections.append((int(round(xv)), int(round(yh))))
 
     return intersections
@@ -126,11 +118,42 @@ def draw_lines_and_points(image, horizontal_lines, vertical_lines, intersections
 
 
 def drawCircle(vis, x, y):
+    """Draw a yellow circle on an image.
+
+    Parameters
+    ----------
+    vis : ndarray
+        Image on which to draw the circle.
+    x : float or int
+        X-coordinate of the circle center.
+    y : float or int
+        Y-coordinate of the circle center.
+    """
     cv2.circle(vis, (int(x), int(y)), radius=5,
                color=(0, 255, 255), thickness=6)
 
 
 def getMiddles(corner1, corner2):
+    """Compute nine evenly spaced midpoint locations between two corners.
+
+    The two arguments are assumed to represent opposite corners of a square
+    region.  The returned list contains `Point` objects for the centres of a
+    3×3 grid laid out between those corners (including the corners themselves
+    offset by half a cell).  This is used to sample the nine facelets of a
+    Rubik's cube face after the bounding box has been determined.
+
+    Parameters
+    ----------
+    corner1 : Point
+        One corner of the square region.
+    corner2 : Point
+        The opposite corner of the square region.
+
+    Returns
+    -------
+    list of Point
+        Nine centre points arranged row‑major from top-left to bottom-right.
+    """
 
     distX = corner2.x - corner1.x
     distY = corner2.y - corner1.y
@@ -148,6 +171,19 @@ def getMiddles(corner1, corner2):
 
 
 def main(image_path):
+    """Process an image of a Rubik's cube face and visualize detected lines, intersections, and colors.
+
+    This function ties together the various helpers defined in this module. It
+    loads the specified image, crops it to a region of interest, finds
+    horizontal and vertical lines, computes their intersections, estimates the
+    cube size, samples colour at the nine facelet positions, and displays the
+    result using Matplotlib.
+
+    Parameters
+    ----------
+    image_path : str
+        Path to the input image file to analyse.
+    """
     # Load image
     img = cv2.imread(image_path)
     # img = img[500:1700, 440:1700]
@@ -167,6 +203,7 @@ def main(image_path):
     intersections = get_intersections(horizontal_lines, vertical_lines)
     print(f"Found {len(intersections)} intersection points.")
 
+    # We assume that the size of the image will be aproximatelly of the size of the cube
     x1, y1 = 4000, 4000
     for pair in intersections:
         x1 = min(x1, pair[0])
