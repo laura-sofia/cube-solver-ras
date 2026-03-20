@@ -3,9 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-COLOR_FILE = "colors.txt"
-
-
 class Point:
     """Simple 2D point container holding integer coordinates (x, y)."""
 
@@ -184,14 +181,13 @@ def write_colors_to_file(colors):
             file.write(f"{int(c[0])},{int(c[1])},{int(c[2])}\n")
 
 
-def main(image_path):
-    """Process an image of a Rubik's cube face and visualize detected lines, intersections, and colors.
+def main(image_path, top=100, bottom=700, left=200, right=850):
+    """Process an image of a Rubik's.
 
     This function ties together the various helpers defined in this module. It
     loads the specified image, crops it to a region of interest, finds
     horizontal and vertical lines, computes their intersections, estimates the
-    cube size, samples colour at the nine facelet positions, and displays the
-    result using Matplotlib.
+    cube size, samples colour at the nine facelet positions. 
 
     Parameters
     ----------
@@ -200,8 +196,7 @@ def main(image_path):
     """
     # Load image
     img = cv2.imread(image_path)
-    # img = img[500:1700, 440:1700]
-    img = img[100:700, 200:850]
+    img = img[top:bottom, left:right]
 
     if img is None:
         print(f"Error loading image: {image_path}")
@@ -229,9 +224,7 @@ def main(image_path):
         y2 = max(y2, pair[1])
 
     middles = getMiddles(Point(x1, y1), Point(x2, y2))
-
     cubesize = ((x2 + x1)/2 + (y2 - y1)/2)/2
-
     colors = []
 
     for point in middles:

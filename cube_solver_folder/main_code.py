@@ -1,4 +1,10 @@
 
+# import cube_solver_folder.photo as photo
+# import cube_solver_folder.edge_detector as edge_detector
+# import cube_solver_folder.color_analysis as color_analysis
+# import cube_solver_folder.cube_solver as cube_solver
+# import cube_solver_folder.execute_movements as execute_movements
+
 import photo
 import edge_detector
 import color_analysis
@@ -63,6 +69,9 @@ def main():
     labels_2d = run_kmean(colors)
     if not labels_2d:
         return
+
+    with open("kmean.txt", "w") as file:
+        file.write(str(labels_2d))
 
     movements_string = cube_solver.solve(labels_2d)
 
